@@ -1,8 +1,9 @@
 import React, { Component } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import shortid from "shortid";
-import { Header } from "./src/Header";
-import { List } from "./src/List";
+import { Header } from "./src/components/Header";
+import { List } from "./src/components/List";
+import { ErrorNotification } from "./src/components/ErrorNotification";
 import * as API from "./src/services/article-api";
 
 export default class App extends Component {
@@ -35,6 +36,7 @@ export default class App extends Component {
       .then((data) =>
         this.setState({
           coctails: data.data.drinks,
+          currentPage: 1,
         })
       )
       .catch((error) => this.setState({ error }));
@@ -53,7 +55,7 @@ export default class App extends Component {
             isOpen: isOpen ? !state.isOpen : null,
             selectCategory,
             lastPage: filteredCoctails.length,
-            currentPage: state.currentPage + 1,
+            currentPage: isOpen ? 1 : state.currentPage + 1,
           }))
         )
         .catch((error) => this.setState({ error }));
@@ -88,25 +90,32 @@ export default class App extends Component {
       selectCategory,
       currentPage,
       lastPage,
+      error,
     } = this.state;
     const disabled = currentPage === lastPage;
+
     return (
-      <View style={styles.wrapper}>
-        <Header
-          title={isOpen ? "Filters" : "Drinks"}
-          onPress={this.handleToggle}
-        />
-        <List
-          data={isOpen ? filters : coctails}
-          isOpen={isOpen}
-          onFilter={this.handleFilter}
-          onChoose={this.handleChooseCoctail}
-          categoryName={selectCategory}
-          onDisabled={disabled}
-        />
+      <View>
+        {error ? (
+          <ErrorNotification text={error.message} />
+        ) : (
+          <View>
+            <Header
+              title={isOpen ? "Filters" : "Drinks"}
+              onPress={this.handleToggle}
+              isOpen={isOpen}
+            />
+            <List
+              data={isOpen ? filters : coctails}
+              isOpen={isOpen}
+              onFilter={this.handleFilter}
+              onChoose={this.handleChooseCoctail}
+              categoryName={selectCategory}
+              onDisabled={disabled}
+            />
+          </View>
+        )}
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({});
